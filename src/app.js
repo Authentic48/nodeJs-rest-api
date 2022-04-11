@@ -1,15 +1,18 @@
 const express = require('express');
-const app = express();
 const morgan = require('morgan');
 const mongoose = require('mongoose');
-const productRoutes = require('./api/routes/products')
-const orderRoutes = require('./api/routes/orders')
-const userRoutes = require('./api/routes/user')
-const uri = 'mongodb://localhost:27017/rest-api'
+const productRoutes = require('./routes/products')
+const orderRoutes = require('./routes/orders')
+const userRoutes = require('./routes/user')
+const colors = require('colors')
+const dotenv = require('dotenv')
+const connectDB = require('./config/db')
 
-// conncet to database
-mongoose.connect(uri, { useUnifiedTopology: true, useNewUrlParser: true })
+const app = express();
 
+
+// DB Connection 
+connectDB()
 
 
 // Built in middeware in express
@@ -51,4 +54,9 @@ app.use((error, req, res, next) => {
     });
 });
 
+
+const PORT = process.env.PORT || 5000 
+
+
+app.listen(PORT, console.log(`App is running in ${process.env.NODE_ENV} on port ${PORT}`.blue.underline))
 module.exports = app;
