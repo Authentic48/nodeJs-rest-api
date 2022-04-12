@@ -1,13 +1,25 @@
-const mongoose = require('mongoose');
-const userSchema = mongoose.Schema({
+const mongoose = require("mongoose");
+const userSchema = mongoose.Schema(
+  {
     email: {
-        type: String,
-        required: true,
-        unique: true,
-        match: /[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?/
+      type: String,
+      required: true,
+      unique: true
     },
-    password: { type: String, required: true },
+    password: {
+      type: String,
+      required: true,
+    },
+  },
+  {
+    toJSON: {
+      transform(doc, ret) {
+        delete ret.password;
+        },
+    },
+  }
+);
 
-});
+const User = mongoose.model("User", userSchema);
 
-module.exports = mongoose.model('User', userSchema);
+module.exports = User;
