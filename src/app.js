@@ -35,8 +35,8 @@ app.use((req, res, next) => {
 
 
 // Routes
-app.use('/products', productRoutes);
-app.use('/orders', orderRoutes);
+// app.use('/products', productRoutes);
+// app.use('/orders', orderRoutes);
 app.use('/user', userRoutes);
 
 //Fallback routes
