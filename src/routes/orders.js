@@ -57,39 +57,25 @@ router.get(`/:orderId`, checkAuth, (req, res, next) => {
         throw new Error('Not authorized');
     }
 
-    return res.send(order);
+    return res.status(200).send(order);
 });
 
-// // Patch method
-// router.patch(`/:orderId`, (req, res, next) => {
-//     const orderId = mongoose.Types.ObjectId(req.params.orderId);
-
-//     const updatesOps = {};
-//     for (const ops of req.body) {
-//         updatesOps[ops.propName] = ops.value;
-//     }
-
-//     Order.updateOne({ "_id": OrderId }, { $set: updatesOps })
-//         .exec()
-//         .then(updatedOrder => {
-//             res.status(200).json({ updatedOrder });
-//         }).catch(err => res.status(500).json({ error: err }))
-
-// });
 
 // Delete method
 router.delete(`/:orderId`, checkAuth, (req, res, next) => {
-    const orderId = mongoose.Types.ObjectId(req.params.orderId)
-    Order.deleteOne({ "_id": orderId })
-        .exec()
-        .then(delOrderStatus => {
-            res.status(200).json({
-                msg: `Orders delted`,
-                delOrderStatus
-            });
-        })
-        .catch(err => res.status(400).json({ error: `Something is wrong in deleteing Order : ${err}` }));
+    const order = await Order.findById(req.params.orderId).populate('product');
 
+    if (!order) {
+      throw new Error('Order not found!');
+    }
+
+    if (order.user.id !== req.user.id) {
+        throw new Error('Not authorized');
+    }
+
+    order.remove();
+
+    return res.status(204).send('Order deleted successfully');
 });
 
 
