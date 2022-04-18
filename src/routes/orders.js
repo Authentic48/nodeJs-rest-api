@@ -35,18 +35,35 @@ router.get('/', checkAuth, (req, res, next) => {
 });
 
 router.post('/', checkAuth, (req, res, next) => {
+    const {
+        orderItems,
+        shippingAddress,
+        paymentMethod,
+        itemsPrice,
+        taxPrice,
+        shippingPrice,
+        totalPrice
+    } = req.body;
+
+    console.log(`${orderItems}`);
+
+    if (orderItems && orderItems.length === 0) {
+        throw new Error('Oops you forgot to select a product')
+    }
+
     const order = new Order({
-        name: req.body.name,
-        product: mongoose.Types.ObjectId(req.body.product),
-        quantity: req.body.quantity
-    });
-    order.save()
-        .then(orderCreatedRes => {
-            res.status(200).json({
-                msg: `Order Created...`,
-                orderCreatedRes
-            });
-        }).catch(err => res.status(500).json({ error: err }))
+        user: req.user._id,
+        orderItems,
+        shippingAddress,
+        paymentMethod,
+        itemsPrice,
+        taxPrice,
+        shippingPrice,
+        totalPrice
+    })
+
+    const createdOrder = await order.save();
+    res.status(201).json(createdOrder);
 
 });
 
