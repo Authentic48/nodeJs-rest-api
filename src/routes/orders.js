@@ -10,7 +10,7 @@ router.get('/', checkAuth, (req, res, next) => {
     const orders = await Order.find({
         user: req.user.id,
       }).populate('product');
-    return res.send(orders);
+    return res.status(200).send(orders);
 });
 
 router.post('/', checkAuth, (req, res, next) => {
@@ -47,28 +47,17 @@ router.post('/', checkAuth, (req, res, next) => {
 });
 
 router.get(`/:orderId`, checkAuth, (req, res, next) => {
-    const orderId = mongoose.Types.ObjectId(req.params.orderId)
-    Order.findById(orderId)
-        .exec()
-        .then(orderFoundRes => {
-            if (orderFoundRes) {
-                const order = {
-                    name: orderFoundRes.name,
-                    quantity: orderFoundRes.quantity,
-                    product: orderFoundRes.product,
-                    _id: orderFoundRes._id,
-                    url: {
-                        request: {
-                            type: 'GET',
-                            url: `http://localhost:8080/products/${orderFoundRes.product}`
-                        }
-                    }
-                }
-                res.status(200).json({ order });
-            } else {
-                res.status(400).json({ msg: 'order does not exist ' });
-            }
-        }).catch(err => res.status(500).json({ error: err }))
+    const order = await Order.findById(req.params.orderId).populate('product');
+
+    if (!order) {
+      throw new Error('Order not found!');
+    }
+
+    if (order.user.id !== req.user.id) {
+        throw new NotAuthorizedError();
+    }
+    
+    return res.send(order);
 });
 
 // // Patch method
