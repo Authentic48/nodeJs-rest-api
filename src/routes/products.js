@@ -32,35 +32,30 @@ router.get('/', (req, res, next) => {
 });
 
 router.post('/', checkAuth, (req, res, next) => {
-    const product = new Product({
-        name: req.body.name,
-        price: req.body.price,
-
-    });
-    console.log(req.body.name, req.body.price);
-
-    product.save()
-        .then(product => {
-            res.status(200).json({
-                msg: `Product Created...`,
-                product
-            });
-
-        }).catch(err => res.status(500).json({ error: err }))
+    const { name, image, description, brand, category, price, countInStock } = req.body;
+    
+    const product = await Product.create({
+        name,
+        image,
+        description,
+        brand,
+        category,
+        price,
+        countInStock,
+        user: req.user._id
+    })
+    return res.status(201).json(product)
 
 });
 
 router.get(`/:productId`, (req, res, next) => {
-    const productId = mongoose.Types.ObjectId(req.params.productId)
-    Product.findById(productId)
-        .exec()
-        .then(product => {
-            if (product) {
-                res.status(200).json({ product });
-            } else {
-                res.status(400).json({ msg: 'Product does not exist ' });
-            }
-        }).catch(err => res.status(500).json({ error: err }))
+    const product = await Product.findById(req.params.productId)
+    
+    if(!product) {
+        throw new Error('Product not found')
+    }
+
+    return res.status(200).json(product)
 });
 
 // Patch method
