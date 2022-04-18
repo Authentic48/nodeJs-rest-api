@@ -1,16 +1,29 @@
-const jwt = require('jsonwebtoken');
-const JWT_KEY = 'secret';
+const jwt = require('jsonwebtoken')
+const asyncHandler = require('express-async-handler')
+const User = require('../models/user.js')
 
+// @desc This middleware check login user 
+const protect = asyncHandler(async (req, res, next) => {
+    let token
 
-module.exports = (req, res, next) => {
-    try {
-        const decoded = jwt.verify(req.body.token, JWT_KEY);
-        req.userData = decoded;
-        next();
-    } catch (error) {
-        return res.status(401).json({
-            message: 'Auth Failed'
-        })
+    if (req.headers.authorization && req.headers.authorization.startsWith('Bearer')) {
+        try {
+            token = req.headers.authorization.split(' ')[1]
+            const decoded = jwt.verify(token, process.env.JWT_SECRET)
+            req.user = await User.findById(decoded.id)
+
+            next()
+        } catch (error) {
+            console.error(error)
+            res.status(401)
+            throw new Error('Not authorized, token failed')
+        }
     }
 
-};
+    if (!token) {
+        res.status(401)
+        throw new Error('Not authorized, no token')
+    }
+})
+
+module.exports = protect;
