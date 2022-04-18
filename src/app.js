@@ -24,7 +24,7 @@ app.use(morgan('dev'))
 
 // Routes
 app.use('/products', productRoutes);
-// app.use('/orders', orderRoutes);
+app.use('/orders', orderRoutes);
 app.use('/user', userRoutes);
 
 // Error Middlewares
