@@ -7,31 +7,10 @@ const checkAuth = require("../middleware/check-auth");
 
 
 router.get('/', checkAuth, (req, res, next) => {
-    Order.find({})
-        .select('name quantity product _id')
-        .exec()
-        .then(docs => {
-            const metaInfo = {
-                count: docs.length,
-                Orders: docs.map(order => {
-                    return {
-                        name: order.name,
-                        quantity: order.quantity,
-                        product: order.product,
-                        _id: order._id,
-                        url: {
-                            request: {
-                                type: 'GET',
-                                url: `http://localhost:8080/products/${order.product}`
-                            }
-                        }
-                    }
-                })
-            }
-            res.status(200).json({ metaInfo });
-        }).catch(err => res.status(500).json({ error: err }))
-
-
+    const orders = await Order.find({
+        user: req.user.id,
+      }).populate('product');
+    return res.send(orders);
 });
 
 router.post('/', checkAuth, (req, res, next) => {
