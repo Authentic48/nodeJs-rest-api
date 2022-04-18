@@ -54,9 +54,9 @@ router.get(`/:orderId`, checkAuth, (req, res, next) => {
     }
 
     if (order.user.id !== req.user.id) {
-        throw new NotAuthorizedError();
+        throw new Error('Not authorized');
     }
-    
+
     return res.send(order);
 });
 
